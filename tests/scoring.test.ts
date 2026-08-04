@@ -43,6 +43,10 @@ describe("Vila do Conde demo tide wording", () => {
   it("includes the local bodião species profile", () => {
     expect(species.find((item) => item.id === "bodiao")?.scientificName).toBe("Labrus bergylta");
   });
+
+  it("includes the Cais Norte reference zone at the Rio Ave mouth", () => {
+    expect(locations.find((item) => item.id === "loc-cais-norte-foz-ave")?.publicName).toBe("Cais Norte — foz do Rio Ave");
+  });
 });
 
 describe("safety and legal overrides", () => {
