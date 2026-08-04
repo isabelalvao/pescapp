@@ -33,6 +33,18 @@ describe("transparent opportunity score", () => {
   });
 });
 
+describe("Vila do Conde demo tide wording", () => {
+  it("marks the 13:26 Lisbon reading as ebbing and points to low water", () => {
+    const conditions = getDemoConditions(new Date("2026-08-04T12:26:00.000Z"));
+    expect(conditions.tideState.value).toBe("a vazar");
+    expect(conditions.nextLowTide.value).toBe("16:58");
+  });
+
+  it("includes the local bodião species profile", () => {
+    expect(species.find((item) => item.id === "bodiao")?.scientificName).toBe("Labrus bergylta");
+  });
+});
+
 describe("safety and legal overrides", () => {
   it("suppresses the score when a location is closed", () => {
     const result = calculateOpportunity({ location: verifiedLocation({ legalStatus: "closed" }), targetSpecies: species[0], conditions: getDemoConditions(), now: new Date() });

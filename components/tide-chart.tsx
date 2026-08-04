@@ -1,4 +1,6 @@
 import { hourlyForecast } from "@/lib/data/seed";
+import type { MarineConditions } from "@/lib/domain/types";
+import { formatTideState } from "@/lib/format";
 
 function points(values: number[], width: number, height: number, pad = 12): string {
   const min = Math.min(...values);
@@ -10,14 +12,14 @@ function points(values: number[], width: number, height: number, pad = 12): stri
   }).join(" ");
 }
 
-export function TideChart({ compact = false }: { compact?: boolean }) {
+export function TideChart({ compact = false, conditions }: { compact?: boolean; conditions?: MarineConditions }) {
   const width = 680;
   const height = compact ? 150 : 210;
   const tidePoints = points(hourlyForecast.map((item) => item.tide), width, height);
   const wavePoints = points(hourlyForecast.map((item) => item.wave), width, height);
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div><p className="data-label text-white/50">Maré e ondulação · hoje</p><p className="mt-1 text-sm text-white/70">Alturas indicativas de demonstração</p></div><div className="flex gap-3 text-xs"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-amber" />Maré</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#6bd6d0]" />Ondulação</span></div></div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div><p className="data-label text-white/50">Maré e ondulação · hoje</p><p className="mt-1 text-sm text-white/70">{conditions ? `Agora: ${formatTideState(conditions.tideState.value)} · próxima mudança ${conditions.tideState.value === "a vazar" || conditions.tideState.value === "preia-mar" ? conditions.nextLowTide.value : conditions.nextHighTide.value}` : "Leitura indicativa de demonstração"}</p></div><div className="flex gap-3 text-xs"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-amber" />Maré</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#6bd6d0]" />Ondulação</span></div></div>
       <div className="chart-grid overflow-hidden rounded-xl">
         <svg role="img" aria-label="Gráfico indicativo da altura da maré e da ondulação entre as 06:00 e as 20:00" viewBox={`0 0 ${width} ${height}`} className="h-auto w-full">
           <defs><linearGradient id="tideFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f4a621" stopOpacity=".42"/><stop offset="1" stopColor="#f4a621" stopOpacity="0"/></linearGradient></defs>

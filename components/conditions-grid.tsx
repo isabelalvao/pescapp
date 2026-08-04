@@ -1,15 +1,19 @@
 import { CloudRain, Compass, Droplets, Gauge, Sun, Sunrise, Sunset, Thermometer, Waves, Wind } from "lucide-react";
 import type { MarineConditions } from "@/lib/domain/types";
+import { formatTideState } from "@/lib/format";
 
 interface Item { label: string; value: string; helper: string; icon: typeof Wind; }
 
 export function ConditionsGrid({ conditions }: { conditions: MarineConditions }) {
+  const tideChange = conditions.tideState.value === "a vazar" || conditions.tideState.value === "preia-mar"
+    ? { label: "Baixa-mar", time: conditions.nextLowTide.value }
+    : { label: "Preia-mar", time: conditions.nextHighTide.value };
   const items: Item[] = [
     { label: "Vento", value: `${conditions.windSpeed.value} km/h`, helper: conditions.windDirection.value, icon: Wind },
     { label: "Ondulação", value: `${conditions.waveHeight.value.toFixed(1)} m`, helper: `${conditions.swellDirection.value} · ${conditions.wavePeriod.value} s`, icon: Waves },
     { label: "Água", value: `${conditions.seaTemperature.value.toFixed(1)} °C`, helper: "superfície", icon: Droplets },
     { label: "Ar", value: `${conditions.airTemperature.value} °C`, helper: `${conditions.precipitation.value.toFixed(1)} mm/h`, icon: Thermometer },
-    { label: "Maré", value: conditions.tideState.value, helper: `Preia-mar ${conditions.nextHighTide.value}`, icon: Compass },
+    { label: "Maré", value: formatTideState(conditions.tideState.value), helper: `${tideChange.label} ${tideChange.time}`, icon: Compass },
     { label: "Pressão", value: conditions.pressureTrend.value, helper: `${conditions.cloudCover.value}% nuvens`, icon: Gauge },
     { label: "Nascer do sol", value: conditions.sunrise.value, helper: "Europe/Lisbon", icon: Sunrise },
     { label: "Pôr do sol", value: conditions.sunset.value, helper: "luz legal a confirmar", icon: Sunset }

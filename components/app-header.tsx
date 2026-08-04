@@ -15,7 +15,7 @@ export function AppHeader() {
         </Link>
         <DesktopNavigation />
         <div className="flex items-center gap-2">
-          <Link href="/mapa" className="hidden min-h-10 items-center gap-2 rounded-full border border-ink/10 bg-white/60 px-3 text-sm font-semibold md:flex"><span className="h-2 w-2 rounded-full bg-sea" />Vila do Conde<ChevronDown size={15} /></Link>
+          <Link href="/#today-location" aria-label="Escolher zona de pesca" className="hidden min-h-10 items-center gap-2 rounded-full border border-ink/10 bg-white/60 px-3 text-sm font-semibold md:flex"><span className="h-2 w-2 rounded-full bg-sea" />Escolher zona<ChevronDown size={15} /></Link>
           <InstallButton />
           <Link href="/admin" className="grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-white/60 text-ink/65 hover:text-ink" aria-label="Abrir área de administração"><ShieldCheck size={18} /></Link>
         </div>

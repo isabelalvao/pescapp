@@ -214,6 +214,27 @@ export const species: FishSpecies[] = [
     handling: "Apoiar todo o corpo; remover o anzol com cuidado e confirmar regras antes de reter.",
     legal: pendingLegal,
     taxonomySource: sources.worms
+  },
+  {
+    id: "bodiao",
+    slug: "bodiao-reticulado",
+    commonName: "Bodião-reticulado",
+    scientificName: "Labrus bergylta",
+    identification: ["Corpo robusto, com lábios espessos", "Padrão mosqueado ou reticulado muito variável", "Barbatana dorsal longa com espinhos"],
+    similarSpecies: ["Bodião-verde (Centrolabrus trutta)", "Maragota (Labrus bergylta, nome regional)"],
+    habitat: "Fundos rochosos, molhes e zonas de algas; espécie costeira associada a abrigo.",
+    typicalDepthM: "0–30 m junto à costa; registo local por confirmar",
+    localSeasonality: "Possível presença ao longo do ano; observação em Vila do Conde ainda não validada como padrão.",
+    preferredConditions: ["Fundos rochosos", "Água em movimento moderado", "Abrigo junto a estruturas costeiras"],
+    naturalBaits: ["Camarão", "caranguejo", "minhoca do mar"],
+    artificialLures: ["Pequenos vinis", "jigs ligeiros junto à pedra"],
+    hook: "Anzol forte dimensionado ao isco; evitar forçar o peixe contra a pedra.",
+    line: "Monofilamento 0,25–0,35 mm ou multifilamento equivalente.",
+    leader: "Nylon ou fluorocarbono 0,35–0,50 mm, revisto depois de tocar na pedra.",
+    rig: "Montagem de fundo simples ou amostra próxima de abrigo, sempre fora de canais e zonas interditas.",
+    handling: "Molhar as mãos, apoiar o corpo e devolver rapidamente; não subir para molhes, blocos ou estruturas operacionais para alcançar o peixe.",
+    legal: pendingLegal,
+    taxonomySource: sources.worms
   }
 ];
 
@@ -231,7 +252,12 @@ function observation<T>(value: T, unit: string, source = sources.demo): Observat
   };
 }
 
-export function getDemoConditions(): MarineConditions {
+export function getDemoConditions(now = new Date()): MarineConditions {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Lisbon", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(now);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
+  const currentMinutes = hour * 60 + minute;
+  const tideState = currentMinutes >= 10 * 60 + 42 && currentMinutes < 16 * 60 + 58 ? "a vazar" : "a encher";
   return {
     airTemperature: observation(19, "°C"),
     seaTemperature: observation(17.2, "°C"),
@@ -244,7 +270,7 @@ export function getDemoConditions(): MarineConditions {
     precipitation: observation(0.2, "mm/h"),
     pressureTrend: observation("estável", "tendência"),
     cloudCover: observation(62, "%"),
-    tideState: observation("a encher", "estado"),
+    tideState: observation(tideState, "estado"),
     nextHighTide: observation("10:42", "Europe/Lisbon"),
     nextLowTide: observation("16:58", "Europe/Lisbon"),
     sunrise: observation("06:35", "Europe/Lisbon"),

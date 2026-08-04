@@ -1,3 +1,5 @@
+import type { MarineConditions } from "@/lib/domain/types";
+
 export function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat("pt-PT", {
     timeZone: "Europe/Lisbon",
@@ -7,6 +9,15 @@ export function formatDateTime(iso: string): string {
     minute: "2-digit",
     hour12: false
   }).format(new Date(iso));
+}
+
+export function formatTideState(state: MarineConditions["tideState"]["value"]): string {
+  return ({
+    "a encher": "a encher (a subir)",
+    "a vazar": "a vazar (a baixar)",
+    "preia-mar": "preia-mar (estofo)",
+    "baixa-mar": "baixa-mar (estofo)"
+  })[state];
 }
 
 export function formatLongDate(date: Date): string {

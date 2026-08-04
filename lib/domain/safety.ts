@@ -19,7 +19,7 @@ export function runSafetyGate(input: OpportunityInput): SafetyGateResult {
     blocks.push({
       code: "legal_unknown",
       title: "Estado legal por confirmar",
-      detail: "Este local ainda não tem validação humana suficiente. Confirme os editais e a sinalização antes de se deslocar.",
+      detail: "Pode consultar as condições abaixo, mas esta zona ainda não tem confirmação humana de acesso e enquadramento legal. Confirme os editais e a sinalização antes de se deslocar.",
       source: location.source
     });
   }
