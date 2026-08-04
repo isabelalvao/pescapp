@@ -49,14 +49,14 @@ describe("safety and legal overrides", () => {
   it("suppresses the score when a location is closed", () => {
     const result = calculateOpportunity({ location: verifiedLocation({ legalStatus: "closed" }), targetSpecies: species[0], conditions: getDemoConditions(), now: new Date() });
     expect(result.score).toBeNull();
-    expect(result.label).toBe("Recomendação suspensa");
+    expect(result.label).toBe("Índice indisponível");
     expect(result.safety.blocks.map((item) => item.code)).toContain("location_closed");
   });
 
-  it("suppresses the score for the unverified seed locations", () => {
+  it("keeps the aggregated index available when legal information is not yet imported", () => {
     const result = calculateOpportunity({ location: locations[0], targetSpecies: species[0], conditions: getDemoConditions(), now: new Date() });
-    expect(result.score).toBeNull();
-    expect(result.safety.blocks.map((item) => item.code)).toContain("legal_unknown");
+    expect(result.score).toBeTypeOf("number");
+    expect(result.safety.blocks.map((item) => item.code)).not.toContain("legal_unknown");
   });
 
   it("suppresses the score when the bar is closed", () => {
@@ -65,12 +65,12 @@ describe("safety and legal overrides", () => {
     expect(result.safety.blocks.map((item) => item.code)).toContain("bar_closed");
   });
 
-  it("suppresses the score above the location wave threshold", () => {
+  it("keeps the index available above a reference wave threshold", () => {
     const conditions = getDemoConditions();
     conditions.waveHeight.value = 2.3;
     const result = calculateOpportunity({ location: verifiedLocation({ maxSafeWaveM: 1.4 }), targetSpecies: species[0], conditions, now: new Date() });
-    expect(result.score).toBeNull();
-    expect(result.safety.blocks.map((item) => item.code)).toContain("wave_threshold");
+    expect(result.score).toBeTypeOf("number");
+    expect(result.safety.blocks.map((item) => item.code)).not.toContain("wave_threshold");
   });
 
   it("preserves old readings but suppresses the score when critical data is stale", () => {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowRight, Footprints, MapPin, ShieldQuestion } from "lucide-react";
+import { AlertTriangle, ArrowRight, Footprints, MapPin } from "lucide-react";
 import type { FishingLocation, LocationType } from "@/lib/domain/types";
 import { typeLabel } from "@/lib/format";
 
@@ -56,7 +56,7 @@ export function MapExplorer({ locations }: { locations: FishingLocation[] }) {
       <div className="grid min-h-[680px] overflow-hidden rounded-[28px] border border-ink/10 bg-white shadow-soft lg:grid-cols-[360px_1fr]">
         <aside className="order-2 max-h-[680px] overflow-y-auto border-t border-ink/10 bg-[#fbfaf6] p-3 lg:order-1 lg:border-r lg:border-t-0" aria-label="Lista de locais">
           <div className="mb-2 flex items-center justify-between px-2 py-3"><span className="text-sm font-bold">{filtered.length} zonas curadas</span><span className="text-xs text-ink/45">coordenadas aproximadas</span></div>
-          <div className="space-y-2">{filtered.map((location) => <button key={location.id} onClick={() => setSelectedId(location.id)} className={`w-full rounded-2xl border p-4 text-left transition ${selected?.id === location.id ? "border-atlantic bg-foam shadow-sm" : "border-ink/10 bg-white hover:border-ink/25"}`}><div className="flex items-start gap-3"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-white"><MapPin size={16} /></span><span className="min-w-0 flex-1"><span className="block font-bold leading-tight">{location.publicName}</span><span className="mt-1 block text-xs text-ink/50">{typeLabel(location.type)} · {location.experience}</span><span className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-coral"><ShieldQuestion size={14} /> Validação local pendente</span></span></div></button>)}</div>
+          <div className="space-y-2">{filtered.map((location) => <button key={location.id} onClick={() => setSelectedId(location.id)} className={`w-full rounded-2xl border p-4 text-left transition ${selected?.id === location.id ? "border-atlantic bg-foam shadow-sm" : "border-ink/10 bg-white hover:border-ink/25"}`}><div className="flex items-start gap-3"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-white"><MapPin size={16} /></span><span className="min-w-0 flex-1"><span className="block font-bold leading-tight">{location.publicName}</span><span className="mt-1 block text-xs text-ink/50">{typeLabel(location.type)} · {location.experience} · {location.exposure}</span></span></div></button>)}</div>
         </aside>
         <div className="relative order-1 min-h-[420px] lg:order-2 lg:min-h-full">
           <div ref={mapNode} className="absolute inset-0" aria-label="Mapa OpenStreetMap com zonas de pesca aproximadas em Vila do Conde" />

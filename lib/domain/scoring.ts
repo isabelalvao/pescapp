@@ -22,10 +22,10 @@ function factor(
 }
 
 function getLabel(score: number): string {
-  if (score >= 80) return "Oportunidade elevada";
-  if (score >= 65) return "Oportunidade razoável";
-  if (score >= 45) return "Oportunidade limitada";
-  return "Oportunidade baixa";
+  if (score >= 80) return "Índice elevado";
+  if (score >= 65) return "Índice intermédio";
+  if (score >= 45) return "Índice reduzido";
+  return "Índice baixo";
 }
 
 export function calculateOpportunity(input: OpportunityInput): OpportunityResult {
@@ -35,13 +35,13 @@ export function calculateOpportunity(input: OpportunityInput): OpportunityResult
   if (!safety.allowed) {
     return {
       score: null,
-      label: "Recomendação suspensa",
+      label: "Índice indisponível",
       confidence: "baixa",
-      confidenceReason: "Uma regra de segurança ou legal impede a apresentação do índice.",
+      confidenceReason: "Faltam dados atualizados ou existe um condicionamento publicado para esta zona.",
       factors: [],
       safety,
       calculatedAt: now.toISOString(),
-      disclaimer: "A PescApp não substitui os avisos oficiais da Autoridade Marítima, IPMA, DGRM ou autoridades locais."
+      disclaimer: "A PescApp agrega dados de referência; as fontes oficiais prevalecem."
     };
   }
 
@@ -55,7 +55,7 @@ export function calculateOpportunity(input: OpportunityInput): OpportunityResult
   const factors: ScoreFactor[] = [
     factor("tide", conditions.tideState.value === "a encher" ? 1 : 0.35, "Maré", conditions.tideState.value === "a encher" ? "A enchente coincide com o padrão preferencial configurado." : "A fase de maré tem menor afinidade com o perfil escolhido."),
     factor("wind", conditions.windSpeed.value <= 16 ? 0.9 : conditions.windSpeed.value <= 24 ? 0.4 : -0.2, "Vento", `${conditions.windSpeed.value} km/h de ${conditions.windDirection.value}; impacto ajustado à exposição do local.`),
-    factor("swell", conditions.swellHeight.value <= 1 ? 0.85 : conditions.swellHeight.value <= 1.4 ? 0.35 : -0.25, "Ondulação", `${conditions.swellHeight.value.toFixed(1)} m de ${conditions.swellDirection.value}; abaixo do bloqueio de segurança, mas ainda influencia o conforto.`),
+    factor("swell", conditions.swellHeight.value <= 1 ? 0.85 : conditions.swellHeight.value <= 1.4 ? 0.35 : -0.25, "Ondulação", `${conditions.swellHeight.value.toFixed(1)} m de ${conditions.swellDirection.value}; influência considerada no índice.`),
     factor("wavePeriod", conditions.wavePeriod.value <= 10 ? 0.65 : 0.2, "Período", `${conditions.wavePeriod.value} s; períodos longos podem produzir séries mais energéticas.`),
     factor("pressure", conditions.pressureTrend.value === "estável" ? 0.75 : conditions.pressureTrend.value === "a subir" ? 0.55 : 0.15, "Pressão", `Pressão ${conditions.pressureTrend.value}.`),
     factor("precipitation", conditions.precipitation.value < 0.5 ? 0.8 : conditions.precipitation.value < 2 ? 0.3 : -0.2, "Precipitação", `${conditions.precipitation.value.toFixed(1)} mm/h previstos.`),
@@ -77,11 +77,11 @@ export function calculateOpportunity(input: OpportunityInput): OpportunityResult
     label: getLabel(score),
     confidence,
     confidenceReason: demoData
-      ? "Pré-visualização com dados de demonstração; ligue fornecedores reais para uma avaliação operacional."
+      ? "Pré-visualização com dados de demonstração; ligue fornecedores reais para uma leitura atualizada."
       : `${Math.round(conditions.completeness * 100)}% de cobertura e dados críticos com ${Math.round(freshestAge)} min.`,
     factors,
     safety,
     calculatedAt: now.toISOString(),
-    disclaimer: "O índice apoia o planeamento e não garante capturas. Confirme sempre avisos oficiais e condições observadas no local."
+    disclaimer: "Índice agregado de condições para pesca amadora; não garante capturas."
   };
 }

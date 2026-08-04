@@ -15,37 +15,12 @@ export function runSafetyGate(input: OpportunityInput): SafetyGateResult {
   if (location.legalStatus === "closed") {
     blocks.push({ code: "location_closed", title: "Local encerrado", detail: location.legalNote, source: location.source });
   }
-  if (location.legalStatus === "unknown") {
-    blocks.push({
-      code: "legal_unknown",
-      title: "Estado legal por confirmar",
-      detail: "Pode consultar as condições abaixo, mas esta zona ainda não tem confirmação humana de acesso e enquadramento legal. Confirme os editais e a sinalização antes de se deslocar.",
-      source: location.source
-    });
-  }
   if (input.accessProhibited) {
     blocks.push({ code: "access_prohibited", title: "Acesso proibido", detail: "Não entre na zona nem contorne barreiras ou sinalização.", source: sources.amn });
   }
   if (input.barOpen === false) {
     blocks.push({ code: "bar_closed", title: "Barra fechada", detail: "A situação da barra prevalece sobre qualquer janela de pesca calculada.", source: sources.amn });
   }
-  if (conditions.waveHeight.value > location.maxSafeWaveM) {
-    blocks.push({
-      code: "wave_threshold",
-      title: "Ondulação acima do limite validado",
-      detail: `${conditions.waveHeight.value.toFixed(1)} m excede o limite configurado de ${location.maxSafeWaveM.toFixed(1)} m para este local.`,
-      source: conditions.waveHeight.source
-    });
-  }
-  if (conditions.windSpeed.value > location.maxSafeWindKmh) {
-    blocks.push({
-      code: "wind_threshold",
-      title: "Vento acima do limite validado",
-      detail: `${conditions.windSpeed.value.toFixed(0)} km/h excede o limite configurado de ${location.maxSafeWindKmh.toFixed(0)} km/h.`,
-      source: conditions.windSpeed.source
-    });
-  }
-
   const missingCritical = criticalKeys.some((key) => conditions[key]?.value === null || conditions[key]?.value === undefined);
   if (missingCritical) {
     blocks.push({ code: "missing_critical_data", title: "Faltam dados críticos", detail: "Sem vento, ondulação e maré completos não é possível avaliar este local.", source: sources.ipma });

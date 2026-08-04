@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, ArrowLeft, Car, ExternalLink, Footprints, MapPin, ShieldAlert, Waves } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Car, ExternalLink, Footprints, Info, MapPin } from "lucide-react";
 import { ConditionsGrid } from "@/components/conditions-grid";
 import { TideChart } from "@/components/tide-chart";
 import { getDemoConditions, hourlyForecast, locations, species } from "@/lib/data/seed";
 import { calculateOpportunity } from "@/lib/domain/scoring";
 import { typeLabel } from "@/lib/format";
 
-export function generateStaticParams() { return locations.map((location) => ({ slug: location.slug })); }
+export function generateStaticParams() {
+  return locations.map((location) => ({ slug: location.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -20,9 +22,41 @@ export default async function LocationDetail({ params }: { params: Promise<{ slu
   const { slug } = await params;
   const location = locations.find((item) => item.slug === slug);
   if (!location) notFound();
-  const conditions = getDemoConditions();
+
+  const now = new Date();
+  const conditions = getDemoConditions(now);
   const target = species.find((item) => location.targetSpeciesIds.includes(item.id)) ?? species[0];
-  const opportunity = calculateOpportunity({ location, conditions, targetSpecies: target, now: new Date() });
+  const index = calculateOpportunity({ location, conditions, targetSpecies: target, now });
   const targets = species.filter((item) => location.targetSpeciesIds.includes(item.id));
-  return <div className="page-wrap"><Link href="/mapa" className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-ink/60 hover:text-ink"><ArrowLeft size={17} /> Voltar ao mapa</Link><div className="grid gap-6 lg:grid-cols-[1fr_390px]"><div><div className="flex flex-wrap gap-2"><span className="chip">{typeLabel(location.type)}</span><span className="chip">Nível {location.experience}</span><span className="chip bg-amber/15">Coordenadas aproximadas</span></div><h1 className="display-title mt-4">{location.publicName}</h1><p className="mt-4 max-w-2xl text-base leading-7 text-ink/65">{location.access}</p></div><div className="rounded-[22px] border border-coral/30 bg-[#5a251f] p-5 text-white"><div className="flex gap-3"><ShieldAlert className="shrink-0 text-amber" /><div><p className="eyebrow text-white/50">Recomendação suspensa</p><h2 className="mt-1 font-display text-2xl">{opportunity.safety.blocks[0]?.title}</h2><p className="mt-2 text-sm leading-6 text-white/70">{opportunity.safety.blocks[0]?.detail}</p><a href={location.source.url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-amber">Consultar fonte oficial <ExternalLink size={15} /></a></div></div></div></div><section className="mt-7"><p className="eyebrow">Condições atuais</p><h2 className="mb-4 mt-1 font-display text-3xl tracking-tight">Leitura de demonstração</h2><ConditionsGrid conditions={conditions} /></section><div className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]"><section className="surface-dark p-5 sm:p-7"><TideChart /></section><section className="surface p-5 sm:p-7"><p className="eyebrow">Acesso</p><div className="mt-5 space-y-5"><div className="flex gap-3"><Car className="shrink-0 text-atlantic" size={20}/><div><strong>Estacionamento</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.parking}</p></div></div><div className="flex gap-3"><Footprints className="shrink-0 text-atlantic" size={20}/><div><strong>{location.walkingDistanceM} m a pé</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.terrain}</p></div></div><div className="flex gap-3"><MapPin className="shrink-0 text-atlantic" size={20}/><div><strong>Acessibilidade</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.accessibility}</p></div></div></div></section></div><section className="surface mt-5 overflow-hidden"><div className="border-b border-ink/10 p-5 sm:p-7"><p className="eyebrow">Hora a hora</p><h2 className="mt-1 font-display text-3xl tracking-tight">Evolução prevista</h2></div><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="bg-foam/60 text-[10px] uppercase tracking-[.14em] text-ink/50"><tr><th className="p-4 pl-7">Hora</th><th className="p-4">Maré</th><th className="p-4">Ondulação</th><th className="p-4">Vento</th><th className="p-4">Índice técnico</th></tr></thead><tbody>{hourlyForecast.map((item) => <tr key={item.time} className="border-t border-ink/10"><td className="p-4 pl-7 font-bold">{item.time}</td><td className="p-4">{item.tide.toFixed(1)} m</td><td className="p-4">{item.wave.toFixed(1)} m</td><td className="p-4">{item.wind} km/h</td><td className="p-4"><span className="font-bold">—</span> <span className="ml-2 text-xs text-coral">bloqueado por validação</span></td></tr>)}</tbody></table></div></section><div className="mt-5 grid gap-5 lg:grid-cols-2"><section className="surface p-5 sm:p-7"><p className="eyebrow">Padrões e espécies</p><h2 className="mt-1 font-display text-3xl tracking-tight">Hipóteses a validar</h2><div className="mt-5 flex flex-wrap gap-2">{location.productivePatterns.map((pattern) => <span key={pattern} className="chip bg-foam">{pattern}</span>)}</div><div className="mt-5 space-y-3">{targets.map((fish) => <div key={fish.id} className="rounded-2xl border border-ink/10 p-4"><strong>{fish.commonName}</strong><em className="ml-2 text-sm text-ink/50">{fish.scientificName}</em><p className="mt-2 text-sm text-ink/60">{fish.rig} · {fish.naturalBaits.slice(0,2).join(" ou ")}.</p></div>)}</div></section><section className="surface p-5 sm:p-7"><p className="eyebrow">Perigos conhecidos</p><h2 className="mt-1 font-display text-3xl tracking-tight">Parar, observar, decidir</h2><ul className="mt-5 space-y-3">{location.hazards.map((hazard) => <li key={hazard} className="flex gap-3 rounded-2xl bg-amber/10 p-3 text-sm font-semibold"><AlertTriangle size={18} className="shrink-0 text-[#9a5f00]" />{hazard}</li>)}</ul><div className="mt-5 border-t border-ink/10 pt-5 text-sm leading-6 text-ink/60"><strong className="text-ink">Última verificação humana:</strong> {location.lastHumanVerification ?? "ainda não realizada"}.<br/>A PescApp não substitui avisos marítimos oficiais.</div></section></div></div>;
+  const sourceBlock = index.safety.blocks[0];
+
+  return (
+    <div className="page-wrap">
+      <Link href="/mapa" className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-ink/60 hover:text-ink"><ArrowLeft size={17} /> Voltar ao mapa</Link>
+      <div className="grid gap-6 lg:grid-cols-[1fr_390px]">
+        <div>
+          <div className="flex flex-wrap gap-2"><span className="chip">{typeLabel(location.type)}</span><span className="chip">Nível {location.experience}</span><span className="chip bg-foam">Coordenadas aproximadas</span></div>
+          <h1 className="display-title mt-4">{location.publicName}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-ink/65">{location.access}</p>
+        </div>
+        <aside className="surface p-5">
+          <p className="eyebrow">Índice de condições</p>
+          {index.score !== null ? <><p className="mt-2 font-display text-5xl tracking-tight">{index.score}<span className="ml-1 text-xl text-ink/40">/100</span></p><p className="mt-1 font-semibold">{index.label}</p><p className="mt-3 text-sm leading-6 text-ink/60">{index.disclaimer}</p></> : <><p className="mt-2 font-display text-3xl">Índice indisponível</p><p className="mt-3 text-sm leading-6 text-ink/60">{sourceBlock?.detail}</p>{sourceBlock && <a href={sourceBlock.source.url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-atlantic">Abrir fonte <ExternalLink size={15} /></a>}</>}
+        </aside>
+      </div>
+
+      <section className="mt-7"><p className="eyebrow">Condições atuais</p><h2 className="mb-4 mt-1 font-display text-3xl tracking-tight">Leitura de demonstração</h2><ConditionsGrid conditions={conditions} /></section>
+      <div className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
+        <section className="surface-dark p-5 sm:p-7"><TideChart conditions={conditions} /></section>
+        <section className="surface p-5 sm:p-7"><p className="eyebrow">Acesso e terreno</p><div className="mt-5 space-y-5"><div className="flex gap-3"><Car className="shrink-0 text-atlantic" size={20}/><div><strong>Estacionamento</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.parking}</p></div></div><div className="flex gap-3"><Footprints className="shrink-0 text-atlantic" size={20}/><div><strong>{location.walkingDistanceM} m a pé</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.terrain}</p></div></div><div className="flex gap-3"><MapPin className="shrink-0 text-atlantic" size={20}/><div><strong>Acessibilidade</strong><p className="mt-1 text-sm leading-6 text-ink/60">{location.accessibility}</p></div></div></div></section>
+      </div>
+
+      <section className="surface mt-5 overflow-hidden"><div className="border-b border-ink/10 p-5 sm:p-7"><p className="eyebrow">Hora a hora</p><h2 className="mt-1 font-display text-3xl tracking-tight">Evolução indicativa</h2></div><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="bg-foam/60 text-[10px] uppercase tracking-[.14em] text-ink/50"><tr><th className="p-4 pl-7">Hora</th><th className="p-4">Maré</th><th className="p-4">Ondulação</th><th className="p-4">Vento</th><th className="p-4">Índice</th></tr></thead><tbody>{hourlyForecast.map((item) => <tr key={item.time} className="border-t border-ink/10"><td className="p-4 pl-7 font-bold">{item.time}</td><td className="p-4">{item.tide.toFixed(1)} m</td><td className="p-4">{item.wave.toFixed(1)} m</td><td className="p-4">{item.wind} km/h</td><td className="p-4 font-bold">{item.score}/100</td></tr>)}</tbody></table></div></section>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <section className="surface p-5 sm:p-7"><p className="eyebrow">Padrões e espécies</p><h2 className="mt-1 font-display text-3xl tracking-tight">Dados associados</h2><div className="mt-5 flex flex-wrap gap-2">{location.productivePatterns.map((pattern) => <span key={pattern} className="chip bg-foam">{pattern}</span>)}</div><div className="mt-5 space-y-3">{targets.map((fish) => <div key={fish.id} className="rounded-2xl border border-ink/10 p-4"><strong>{fish.commonName}</strong><em className="ml-2 text-sm text-ink/50">{fish.scientificName}</em><p className="mt-2 text-sm text-ink/60">{fish.rig} · {fish.naturalBaits.slice(0,2).join(" ou ")}.</p></div>)}</div></section>
+        <section className="surface p-5 sm:p-7"><p className="eyebrow">Características do local</p><h2 className="mt-1 font-display text-3xl tracking-tight">Exposição e terreno</h2><ul className="mt-5 space-y-3">{location.hazards.map((hazard) => <li key={hazard} className="flex gap-3 rounded-2xl bg-foam p-3 text-sm font-semibold"><AlertTriangle size={18} className="shrink-0 text-atlantic" />{hazard}</li>)}</ul><div className="mt-5 border-t border-ink/10 pt-5 text-sm leading-6 text-ink/60"><Info size={15} className="mr-2 inline text-atlantic" />Dados do local provenientes de <a href={location.source.url} target="_blank" rel="noreferrer" className="font-bold text-atlantic">{location.source.label}</a>.</div></section>
+      </div>
+    </div>
+  );
 }

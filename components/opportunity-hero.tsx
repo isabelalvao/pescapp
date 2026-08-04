@@ -5,7 +5,6 @@ import { formatDateTime, formatTideState } from "@/lib/format";
 
 export function OpportunityHero({ result, location, conditions }: { result: OpportunityResult; location: FishingLocation; conditions: MarineConditions }) {
   const blocked = !result.safety.allowed;
-  const legalReviewOnly = result.safety.blocks.length > 0 && result.safety.blocks.every((block) => block.code === "legal_unknown");
   const firstBlock = result.safety.blocks[0];
   const tideChange = conditions.tideState.value === "a vazar" || conditions.tideState.value === "preia-mar"
     ? { label: "Próxima baixa-mar", time: conditions.nextLowTide.value }
@@ -30,12 +29,12 @@ export function OpportunityHero({ result, location, conditions }: { result: Oppo
         </div>
       </div>
       {blocked ? (
-        <div className={`flex flex-col gap-3 border-t px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 ${legalReviewOnly ? "border-amber/30 bg-amber/10" : "border-coral/25 bg-coral/5"}`}>
-          <div className="flex gap-2.5"><AlertTriangle size={18} className={`mt-0.5 shrink-0 ${legalReviewOnly ? "text-[#9a5f00]" : "text-coral"}`} /><p><strong>{legalReviewOnly ? "Acesso e regras por confirmar." : firstBlock?.title}</strong> <span className="text-ink/65">{legalReviewOnly ? "A leitura está disponível, mas não emitimos uma recomendação de deslocação." : firstBlock?.detail}</span></p></div>
+        <div className="flex flex-col gap-3 border-t border-coral/25 bg-coral/5 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex gap-2.5"><AlertTriangle size={18} className="mt-0.5 shrink-0 text-coral" /><p><strong>{firstBlock?.title}</strong> <span className="text-ink/65">{firstBlock?.detail}</span></p></div>
           {firstBlock && <a href={firstBlock.source.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1.5 font-bold text-ink hover:text-atlantic">Fonte oficial <ExternalLink size={15} /></a>}
         </div>
       ) : (
-        <div className="flex flex-col gap-2 border-t border-sea/20 bg-sea/10 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6"><span className="flex items-center gap-2"><Sparkles size={16} className="text-sea" /><strong>{result.score}/100 · {result.label}</strong><span className="text-ink/60">{result.disclaimer}</span></span><span className="chip shrink-0">Confiança {result.confidence}</span></div>
+        <div className="flex flex-col gap-2 border-t border-sea/20 bg-sea/10 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6"><span className="flex items-center gap-2"><Sparkles size={16} className="text-sea" /><strong>Índice de condições: {result.score}/100 · {result.label}</strong><span className="text-ink/60">{result.disclaimer}</span></span><span className="chip shrink-0">Confiança {result.confidence}</span></div>
       )}
       <div className="flex items-center gap-2 border-t border-ink/10 px-5 py-2 text-xs text-ink/45 sm:px-6"><Info size={13} />{result.confidenceReason} · Atualizado {formatDateTime(result.calculatedAt)}</div>
     </section>
